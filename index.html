@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Pollution Monitor</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
+    <style>
+        /* CFC Button Styles */
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .cfc-btn {
+            background-color: #009966;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .cfc-btn:hover {
+            background-color: #007755;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="assets/img/logo.png" alt="Air Monitor Logo" class="logo">
+            <h1>Air Pollution Monitor</h1>
+        </div>
+        <div class="nav-container">
+            <a href="CFC.html" class="cfc-btn">CFC</a>
+            <div class="search-container">
+                <input type="text" id="city-search" placeholder="Enter city name...">
+                <button id="search-btn">Search</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="current-info">
+                    <h2>Current Air Quality</h2>
+                    <div class="aqi-display">
+                        <div class="aqi-value">--</div>
+                        <div class="aqi-label">AQI Level</div>
+                    </div>
+                    <div class="pollutants">
+                        <h3>Pollutants</h3>
+                        <div class="pollutant-grid">
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">CO</span>
+                                <span class="pollutant-value">-- μg/m³</span>
+                            </div>
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">NO<sub>2</sub></span>
+                                <span class="pollutant-value">-- μg/m³</span>
+                            </div>
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">O<sub>3</sub></span>
+                                <span class="pollutant-value">-- μg/m³</span>
+                            </div>
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">PM2.5</span>
+                                <span class="pollutant-value">-- μg/m³</span>
+                            </div>
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">PM10</span>
+                                <span class="pollutant-value">-- μg/m³</span>
+                            </div>
+                            <div class="pollutant-item">
+                                <span class="pollutant-name">SO<sub>2</sub></span>
+                                <span class="pollutant-value">-- μg/m³</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="historical-data">
+                    <h2>Historical Data (48 Hours)</h2>
+                    <div id="time-slider"></div>
+                    <div class="slider-labels">
+                        <span class="start-time">48 hours ago</span>
+                        <span class="current-time">Now</span>
+                    </div>
+                    <div class="selected-time">
+                        Selected: <span id="selected-datetime">Current</span>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <h3>Air Quality Index</h3>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #009966;"></div>
+                            <span>Good (1)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #ffde33;"></div>
+                            <span>Fair (2)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #ff9933;"></div>
+                            <span>Moderate (3)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #cc0033;"></div>
+                            <span>Poor (4)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box" style="background-color: #660099;"></div>
+                            <span>Very Poor (5)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 Air Pollution Monitor | Data provided by OpenWeather API</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+    <script src="assets/js/map.js"></script>
+    <script src="assets/js/pollution.js"></script>
+    <script src="assets/js/slider.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

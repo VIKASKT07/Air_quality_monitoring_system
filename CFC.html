@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carbon Footprint Calculator</title>
+  
+  <!-- Include Recharts dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.9.0/Recharts.js"></script>
+  
+  <style>
+    /* Light mode styles */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1152px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      position: relative; /* Added for absolute positioning of home button */
+    }
+    
+    /* Home button styles */
+    .home-button {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #3B82F6;
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background-color 0.2s;
+    }
+    
+    .home-button:hover {
+      background-color: #2563EB;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #333;
+    }
+    
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .card {
+      background-color: #f0f4f8;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #4a5568;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 0.25rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    
+    .results-section {
+      margin-top: 2rem;
+    }
+    
+    .chart-container {
+      height: 16rem;
+    }
+    
+    .colors-legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .color-box {
+      width: 1rem;
+      height: 1rem;
+      margin-right: 0.5rem;
+    }
+    
+    .transport-color { background-color: #3B82F6; }
+    .electricity-color { background-color: #EF4444; }
+    .waste-color { background-color: #F59E0B; }
+    .diet-color { background-color: #10B981; }
+    
+    .statistics {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 2rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    
+    .monthly-stat { color: #10B981; }
+    .yearly-stat { color: #3B82F6; }
+    
+    .stat-label {
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+    
+    .feedback {
+      margin-top: 2rem;
+      background-color: #dbeafe;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      color: #1e40af;
+    }
+
+    /* Styles for details within input cards */
+    .details-toggle-btn-inline {
+        background-color: #e2e8f0;
+        color: #4a5568;
+        border: 1px solid #cbd5e1;
+        padding: 0.3rem 0.6rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        display: block; 
+    }
+    .details-toggle-btn-inline:hover {
+        background-color: #cbd5e1;
+    }
+    .calculation-details-inline {
+        background-color: #e9eff5;
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        border: 1px dashed #b0c4de;
+    }
+    .calculation-details-inline p {
+        margin-bottom: 0.3rem;
+    }
+    .calculation-details-inline strong {
+        color: #2d3748;
+    }
+
+    /* Styles for the consolidated breakdown section */
+    .consolidated-breakdown-section {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background-color: #f7fafc; /* Light gray background */
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+    }
+    .details-toggle-btn-consolidated {
+        background-color: #4A5568; /* Darker Gray */
+        color: white;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 1rem;
+        transition: background-color 0.2s;
+    }
+    .details-toggle-btn-consolidated:hover {
+        background-color: #2D3748; /* Even Darker Gray */
+    }
+    .consolidated-calculation-details {
+        background-color: #ffffff;
+        padding: 1.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .consolidated-calculation-details h3 {
+        font-size: 1.15rem;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #edf2f7;
+    }
+    .consolidated-calculation-details h3:first-child {
+        margin-top: 0;
+    }
+    .consolidated-calculation-details p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 0.3rem;
+    }
+    .consolidated-calculation-details strong {
+        color: #2d3748;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  
+  <script>
+    const { useState, useEffect } = React;
+    const { 
+      PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip 
+    } = Recharts;
+    
+    function CarbonFootprintCalculator() {
+      // State for user inputs
+      const [distance, setDistance] = useState(0);
+      const [transportType, setTransportType] = useState('car');
+      const [electricity, setElectricity] = useState(0);
+      const [waste, setWaste] = useState(0);
+      const [meatConsumption, setMeatConsumption] = useState(0);
+
+      // State for showing/hiding calculation details within input cards
+      const [showTransportDetailsInline, setShowTransportDetailsInline] = useState(false);
+      const [showElectricityDetailsInline, setShowElectricityDetailsInline] = useState(false);
+      const [showWasteDetailsInline, setShowWasteDetailsInline] = useState(false);
+      const [showDietDetailsInline, setShowDietDetailsInline] = useState(false);
+
+      // State for showing/hiding the consolidated calculation details
+      const [showConsolidatedDetails, setShowConsolidatedDetails] = useState(false);
+      
+      // Emission factors (kg CO2e per unit)
+      const emissionFactors = {
+        transport: {
+          car: 0.17, bus: 0.1, train: 0.04, bicycle: 0, walking: 0
+        },
+        electricity: 0.233, waste: 0.57, meat: 27
+      };
+      
+      // Calculate carbon footprint components
+      const transportEmissions = distance * emissionFactors.transport[transportType] * 30;
+      const electricityEmissions = electricity * emissionFactors.electricity;
+      const wasteEmissions = waste * 4 * emissionFactors.waste;
+      const meatEmissions = meatConsumption * 4 * emissionFactors.meat;
+      
+      const totalEmissions = transportEmissions + electricityEmissions + wasteEmissions + meatEmissions;
+      const annualEmissions = totalEmissions * 12 / 1000;
+      
+      const distributionData = [
+        { name: 'Transport', value: parseFloat(transportEmissions.toFixed(2)), color: '#3B82F6' },
+        { name: 'Electricity', value: parseFloat(electricityEmissions.toFixed(2)), color: '#EF4444' },
+        { name: 'Waste', value: parseFloat(wasteEmissions.toFixed(2)), color: '#F59E0B' },
+        { name: 'Diet', value: parseFloat(meatEmissions.toFixed(2)), color: '#10B981' }
+      ].filter(d => d.value > 0);
+      
+      const COLORS = {
+          'Transport': '#3B82F6', 'Electricity': '#EF4444', 
+          'Waste': '#F59E0B', 'Diet': '#10B981'
+      };
+      
+      const getFeedbackMessage = () => {
+        if (totalEmissions === 0 && distance === 0 && electricity === 0 && waste === 0 && meatConsumption === 0) {
+            return "Enter your data to calculate your carbon footprint.";
+        } else if (totalEmissions < 250) {
+          return "Excellent! Your carbon footprint is very low. Keep up the great work!";
+        } else if (totalEmissions < 500) {
+          return "Great job! Your footprint is below average. Check out ways to reduce it further.";
+        } else if (totalEmissions < 1000) {
+          return "Your footprint is about average. Consider making some changes to reduce it.";
+        } else {
+          return "Your footprint is above average. Consider ways to reduce your impact.";
+        }
+      };
+
+      const renderCalculationDetailForDisplay = (title, calculationSteps, value, unit) => {
+        return React.createElement('div', null,
+          React.createElement('p', null, React.createElement('strong', null, `${title}:`)),
+          calculationSteps.map((step, index) => React.createElement('p', { key: index, style: { marginLeft: '1em' } }, step)),
+          React.createElement('p', { style: { marginLeft: '1em', fontWeight: 'bold' }  }, ` = ${value.toFixed(2)} ${unit}`)
+        );
+      };
+
+      const allContributorsCalculations = [
+          { 
+            name: 'Transport', 
+            show: (transportEmissions > 0 || distance > 0),
+            emissionValue: transportEmissions,
+            details: () => renderCalculationDetailForDisplay(
+                'Monthly Transport Emissions',
+                [
+                    `Daily Distance: ${distance} km`,
+                    `Emission Factor (${transportType}): ${emissionFactors.transport[transportType]} kg CO₂e/km`,
+                    `Days per month (approx.): 30 days`,
+                    `Calculation: ${distance} km/day * ${emissionFactors.transport[transportType]} kg CO₂e/km * 30 days/month`
+                ], transportEmissions, 'kg CO₂e')
+          },
+          { 
+            name: 'Electricity',
+            show: (electricityEmissions > 0 || electricity > 0),
+            emissionValue: electricityEmissions,
+            details: () => renderCalculationDetailForDisplay(
+                'Monthly Electricity Emissions',
+                [
+                    `Monthly Usage: ${electricity} kWh`,
+                    `Emission Factor: ${emissionFactors.electricity} kg CO₂e/kWh`,
+                    `Calculation: ${electricity} kWh * ${emissionFactors.electricity} kg CO₂e/kWh`
+                ], electricityEmissions, 'kg CO₂e')
+          },
+          { 
+            name: 'Waste',
+            show: (wasteEmissions > 0 || waste > 0),
+            emissionValue: wasteEmissions,
+            details: () => renderCalculationDetailForDisplay(
+                'Monthly Waste Emissions',
+                [
+                    `Weekly Waste: ${waste} kg`,
+                    `Weeks per month (approx.): 4 weeks`,
+                    `Emission Factor: ${emissionFactors.waste} kg CO₂e/kg`,
+                    `Calculation: ${waste} kg/week * 4 weeks/month * ${emissionFactors.waste} kg CO₂e/kg`
+                ], wasteEmissions, 'kg CO₂e')
+          },
+          { 
+            name: 'Diet (Meat)',
+            show: (meatEmissions > 0 || meatConsumption > 0),
+            emissionValue: meatEmissions,
+            details: () => renderCalculationDetailForDisplay(
+                'Monthly Diet (Meat) Emissions',
+                [
+                    `Weekly Meat Consumption: ${meatConsumption} kg`,
+                    `Weeks per month (approx.): 4 weeks`,
+                    `Emission Factor (meat): ${emissionFactors.meat} kg CO₂e/kg`,
+                    `Calculation: ${meatConsumption} kg/week * 4 weeks/month * ${emissionFactors.meat} kg CO₂e/kg`
+                ], meatEmissions, 'kg CO₂e')
+          }
+      ];
+
+
+      return React.createElement(
+        'div', { className: 'container' },
+        React.createElement('a', { href: 'index.html', className: 'home-button' }, 'Home'),
+        React.createElement('h1', null, 'Carbon Footprint Calculator'),
+        
+        React.createElement(
+          'div', { className: 'grid' },
+          // Transport Section Card
+          React.createElement('div', { className: 'card' },
+            React.createElement('h2', null, 'Transport'),
+            React.createElement('label', null, 'Daily Travel Distance (km/day)'),
+            React.createElement('input', { type: 'number', value: distance, onChange: (e) => setDistance(Number(e.target.value) < 0 ? 0 : Number(e.target.value)), min: '0' }),
+            React.createElement('label', null, 'Primary Mode of Transport'),
+            React.createElement('select', { value: transportType, onChange: (e) => setTransportType(e.target.value) },
+              ['car', 'bus', 'train', 'bicycle', 'walking'].map(type => 
+                React.createElement('option', { key: type, value: type }, type.charAt(0).toUpperCase() + type.slice(1))
+              )
+            ),
+            React.createElement('button', { className: 'details-toggle-btn-inline', onClick: () => setShowTransportDetailsInline(!showTransportDetailsInline) },
+              showTransportDetailsInline ? 'Hide Details' : 'Show Calculation Details'
+            ),
+            showTransportDetailsInline && React.createElement('div', { className: 'calculation-details-inline' },
+                allContributorsCalculations.find(c => c.name === 'Transport').details()
+            )
+          ),
+          
+          // Electricity Section Card
+          React.createElement('div', { className: 'card' },
+            React.createElement('h2', null, 'Electricity'),
+            React.createElement('label', null, 'Monthly Electricity Usage (kWh)'),
+            React.createElement('input', { type: 'number', value: electricity, onChange: (e) => setElectricity(Number(e.target.value) < 0 ? 0 : Number(e.target.value)), min: '0' }),
+            React.createElement('button', { className: 'details-toggle-btn-inline', onClick: () => setShowElectricityDetailsInline(!showElectricityDetailsInline) },
+              showElectricityDetailsInline ? 'Hide Details' : 'Show Calculation Details'
+            ),
+            showElectricityDetailsInline && React.createElement('div', { className: 'calculation-details-inline' },
+                allContributorsCalculations.find(c => c.name === 'Electricity').details()
+            )
+          ),
+          
+          // Waste Section Card
+          React.createElement('div', { className: 'card' },
+            React.createElement('h2', null, 'Waste'),
+            React.createElement('label', null, 'Weekly Household Waste (kg)'),
+            React.createElement('input', { type: 'number', value: waste, onChange: (e) => setWaste(Number(e.target.value) < 0 ? 0 : Number(e.target.value)), min: '0' }),
+            React.createElement('button', { className: 'details-toggle-btn-inline', onClick: () => setShowWasteDetailsInline(!showWasteDetailsInline) },
+              showWasteDetailsInline ? 'Hide Details' : 'Show Calculation Details'
+            ),
+            showWasteDetailsInline && React.createElement('div', { className: 'calculation-details-inline' },
+                allContributorsCalculations.find(c => c.name === 'Waste').details()
+            )
+          ),
+          
+          // Diet Section Card
+          React.createElement('div', { className: 'card' },
+            React.createElement('h2', null, 'Diet'),
+            React.createElement('label', null, 'Weekly Meat Consumption (kg)'),
+            React.createElement('input', { type: 'number', value: meatConsumption, onChange: (e) => setMeatConsumption(Number(e.target.value) < 0 ? 0 : Number(e.target.value)), min: '0' }),
+            React.createElement('button', { className: 'details-toggle-btn-inline', onClick: () => setShowDietDetailsInline(!showDietDetailsInline) },
+              showDietDetailsInline ? 'Hide Details' : 'Show Calculation Details'
+            ),
+            showDietDetailsInline && React.createElement('div', { className: 'calculation-details-inline' },
+                allContributorsCalculations.find(c => c.name === 'Diet (Meat)').details()
+            )
+          )
+        ),
+        
+        // Results Section (Pie Chart and Summary Stats)
+        React.createElement('div', { className: 'grid results-section' },
+          React.createElement('div', { className: 'card' },
+            React.createElement('h2', { style: { textAlign: 'center' } }, 'Carbon Footprint Distribution (Monthly)'),
+            React.createElement('div', { className: 'chart-container' },
+              React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+                React.createElement(PieChart, null,
+                  React.createElement(Pie, {
+                      data: distributionData, cx: '50%', cy: '50%', labelLine: false, outerRadius: 80,
+                      fill: '#8884d8', dataKey: 'value',
+                      label: ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`
+                    },
+                    distributionData.map((entry, index) => React.createElement(Cell, { key: `cell-${index}`, fill: entry.color }))
+                  ),
+                  React.createElement(Tooltip, { formatter: (value, name) => [`${value.toFixed(2)} kg CO₂e`, name] })
+                )
+              )
+            ),
+            React.createElement('div', { className: 'colors-legend', style: { marginTop: '1.5rem', justifyContent: 'center'} },
+              distributionData.map((entry, index) => 
+                React.createElement('div', { className: 'legend-item', key: `legend-${index}` },
+                  React.createElement('div', { className: 'color-box', style: { backgroundColor: entry.color } }),
+                  React.createElement('span', null, `${entry.name} (${entry.value.toFixed(2)} kg)`)
+                )
+              )
+            )
+          ),
+          
+          React.createElement('div', { className: 'card' },
+            React.createElement('h2', { style: { textAlign: 'center' } }, 'Environmental Impact Summary'),
+            React.createElement('div', { className: 'statistics' },
+              React.createElement('div', { className: 'stat-item' },
+                React.createElement('div', { className: 'stat-value monthly-stat' }, totalEmissions.toFixed(2)),
+                React.createElement('div', { className: 'stat-label' }, 'kg CO', React.createElement('sub', null, '2'), 'e / Month')
+              ),
+              React.createElement('div', { className: 'stat-item' },
+                React.createElement('div', { className: 'stat-value yearly-stat' }, annualEmissions.toFixed(2)),
+                React.createElement('div', { className: 'stat-label' }, 'Tons CO', React.createElement('sub', null, '2'), 'e / Year')
+              )
+            ),
+            React.createElement('div', { className: 'feedback' }, getFeedbackMessage())
+          )
+        ),
+
+        // Consolidated Calculation Breakdown Section (Below Pie Chart area)
+        (totalEmissions > 0 || distance > 0 || electricity > 0 || waste > 0 || meatConsumption > 0) && React.createElement(
+            'div', { className: 'consolidated-breakdown-section' },
+            React.createElement(
+                'button', 
+                { 
+                    className: 'details-toggle-btn-consolidated', 
+                    onClick: () => setShowConsolidatedDetails(!showConsolidatedDetails) 
+                },
+                showConsolidatedDetails ? 'Hide All Calculation Details' : 'Show All Calculation Details'
+            ),
+            showConsolidatedDetails && React.createElement(
+                'div', { className: 'consolidated-calculation-details' },
+                React.createElement('h2', { style: { textAlign: 'center', marginBottom: '1.5rem' } }, 'How Your Monthly Footprint is Calculated:'),
+                allContributorsCalculations.map(contributor => 
+                    contributor.show && React.createElement(
+                        'div', { key: contributor.name, style: { marginBottom: '1rem' } },
+                        React.createElement('h3', { style: { color: COLORS[contributor.name.split(' ')[0]] || '#333' } }, 
+                            `${contributor.name} Emissions: ${contributor.emissionValue.toFixed(2)} kg CO₂e`
+                        ),
+                        contributor.details()
+                    )
+                )
+            )
+        )
+      );
+    }
+
+    ReactDOM.render(React.createElement(CarbonFootprintCalculator), document.getElementById('app'));
+  </script>
+</body>
+</html>
